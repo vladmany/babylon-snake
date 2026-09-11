@@ -28,6 +28,7 @@ export class SegmentDestructionSystem {
       body.setCollisionCallbackEnabled(true);
       body.getCollisionObservable().add((event) => {
         if (this.destroyed[index]) return;
+        if (body.disablePreStep === false) return; // segment is being held by the player
         if (event.type !== PhysicsEventType.COLLISION_STARTED) return;
         if (event.impulse < IMPACT_IMPULSE_THRESHOLD) return;
         this.destroy(index, event.point);
