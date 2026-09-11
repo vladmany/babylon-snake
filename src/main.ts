@@ -3,6 +3,7 @@ import { createCoreScene } from "./core/scene";
 import { enablePhysics } from "./core/physics";
 import { createGround } from "./core/ground";
 import { Snake } from "./snake/Snake";
+import { SnakeDragController } from "./snake/SnakeDragController";
 
 async function bootstrap(): Promise<void> {
   const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -10,7 +11,8 @@ async function bootstrap(): Promise<void> {
 
   await enablePhysics(scene);
   createGround(scene);
-  new Snake(scene);
+  const snake = new Snake(scene);
+  new SnakeDragController(snake.segments);
 
   engine.runRenderLoop(() => scene.render());
   window.addEventListener("resize", () => engine.resize());
