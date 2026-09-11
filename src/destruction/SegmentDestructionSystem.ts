@@ -1,0 +1,56 @@
+import { PhysicsEventType, PhysicsMotionType, Quaternion, type Vector3 } from "@babylonjs/core";
+import type { Snake } from "../snake/Snake";
+import type { FragmentPool } from "./FragmentPool";
+
+const IMPACT_IMPULSE_THRESHOLD = 6;
+
+export type SegmentDestroyedHandler = (index: number, point: Vector3 | null) => void;
+
+/** Watches each snake segment's ground impacts and swaps hard-hit segments for pooled shards. */
+export class SegmentDestructionSystem {
+  private readonly snake: Snake;
+  private readonly fragmentPool: FragmentPool;
+  private readonly onSegmentDestroyed: SegmentDestroyedHandler | undefined;
+  private readonly destroyed: boolean[];
+
+  constructor(
+    snake: Snake,
+    fragmentPool: FragmentPool,
+    onSegmentDestroyed?: SegmentDestroyedHandler,
+  ) {
+    this.snake = snake;
+    this.fragmentPool = fragmentPool;
+    this.onSegmentDestroyed = onSegmentDestroyed;
+    this.destroyed = snake.segments.map(() => false);
+
+    snake.segments.forEach((segment, index) => {
+      const body = segment.aggregate.body;
+      body.setCollisionCallbackEnabled(true);
+      body.getCollisionObservable().add((event) => {
+        if (this.destroyed[index]) return;
+        if (event.type !== PhysicsEventType.COLLISION_STARTED) return;
+        if (event.impulse < IMPACT_IMPULSE_THRESHOLD) return;
+        this.destroy(index, event.point);
+      });
+    });
+  }
+
+  public isDestroyed(index: number): boolean {
+    return this.destroyed[index] ?? false;
+  }
+
+  private destroy(index: number, point: Vector3 | null): void {
+    this.destroyed[index] = true;
+    const segment = this.snake.segments[index]!;
+    const worldPosition = segment.mesh.getAbsolutePosition().clone();
+    const worldRotation = (segment.mesh.rotationQuaternion ?? Quaternion.Identity()).clone();
+
+    this.snake.detachSegment(index);
+    segment.mesh.setEnabled(false);
+    segment.aggregate.body.setCollisionCallbackEnabled(false);
+    segment.aggregate.body.setMotionType(PhysicsMotionType.STATIC);
+
+    this.fragmentPool.activate(index, worldPosition, worldRotation);
+    this.onSegmentDestroyed?.(index, point);
+  }
+}

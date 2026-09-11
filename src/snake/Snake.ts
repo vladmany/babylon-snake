@@ -1,17 +1,12 @@
-import { BallAndSocketConstraint, Color3, Vector3, type Scene } from "@babylonjs/core";
+import { BallAndSocketConstraint, Vector3, type Scene } from "@babylonjs/core";
 import { SEGMENT_SIZE, SnakeSegment } from "./SnakeSegment";
-
-const SEGMENT_COLORS: readonly Color3[] = [
-  new Color3(0.2, 0.7, 0.3),
-  new Color3(0.85, 0.7, 0.15),
-  new Color3(0.8, 0.35, 0.15),
-  new Color3(0.75, 0.15, 0.2),
-];
+import { SEGMENT_COLORS } from "./segmentColors";
 
 const HALF_WIDTH = SEGMENT_SIZE.width / 2;
 
 export class Snake {
   public readonly segments: readonly SnakeSegment[];
+  private readonly constraints: (BallAndSocketConstraint | undefined)[];
 
   constructor(scene: Scene, segmentCount = 4, startPosition = new Vector3(0, 3, 0)) {
     const segments: SnakeSegment[] = [];
@@ -26,8 +21,8 @@ export class Snake {
     }
     this.segments = segments;
 
-    for (let i = 0; i < segments.length - 1; i++) {
-      const bodyA = segments[i]!.aggregate.body;
+    this.constraints = segments.slice(0, -1).map((segment, i) => {
+      const bodyA = segment.aggregate.body;
       const bodyB = segments[i + 1]!.aggregate.body;
       const constraint = new BallAndSocketConstraint(
         new Vector3(HALF_WIDTH, 0, 0),
@@ -37,10 +32,22 @@ export class Snake {
         scene,
       );
       bodyA.addConstraint(bodyB, constraint);
-    }
+      return constraint;
+    });
+  }
+
+  /** Detaches a segment from its neighbors, used right before it is destroyed. */
+  public detachSegment(index: number): void {
+    this.constraints[index - 1]?.dispose();
+    this.constraints[index - 1] = undefined;
+    this.constraints[index]?.dispose();
+    this.constraints[index] = undefined;
   }
 
   public dispose(): void {
+    for (const constraint of this.constraints) {
+      constraint?.dispose();
+    }
     for (const segment of this.segments) {
       segment.dispose();
     }
