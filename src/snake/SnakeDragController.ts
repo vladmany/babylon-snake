@@ -1,8 +1,5 @@
 import { PointerDragBehavior } from "@babylonjs/core";
-import { SEGMENT_SIZE, type SnakeSegment } from "./SnakeSegment";
-
-const GROUND_SURFACE_Y = 0;
-const MIN_SEGMENT_Y = GROUND_SURFACE_Y + SEGMENT_SIZE.height / 2;
+import type { SnakeSegment } from "./SnakeSegment";
 
 export class SnakeDragController {
   private readonly behaviors: PointerDragBehavior[] = [];
@@ -11,8 +8,6 @@ export class SnakeDragController {
     for (const segment of segments) {
       const behavior = new PointerDragBehavior();
       const body = segment.aggregate.body;
-
-      behavior.validateDrag = (target) => target.y >= MIN_SEGMENT_Y;
 
       behavior.onDragStartObservable.add(() => {
         body.disablePreStep = false;
