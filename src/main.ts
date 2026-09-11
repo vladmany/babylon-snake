@@ -15,14 +15,14 @@ import { GroundContactDust } from "./particles/GroundContactDust";
 import dustTextureUrl from "./assets/textures/dust-particle.png";
 
 const OBSTACLE_BEAMS: readonly ObstacleBeamDefinition[] = [
-  { origin: new Vector3(-4, 0.55, -15), direction: new Vector3(0, 0, 1), length: 18 },
-  { origin: new Vector3(-1, 0.55, -3), direction: new Vector3(0, 0, 1), length: 18 },
-  { origin: new Vector3(2, 0.55, -15), direction: new Vector3(0, 0, 1), length: 18 },
-  { origin: new Vector3(5, 0.55, -3), direction: new Vector3(0, 0, 1), length: 18 },
+  { origin: new Vector3(-6, 0.55, -15), direction: new Vector3(0, 0, 1), length: 20 },
+  { origin: new Vector3(0, 0.55, -5), direction: new Vector3(0, 0, 1), length: 20 },
+  { origin: new Vector3(6, 0.55, -15), direction: new Vector3(0, 0, 1), length: 20 },
+  { origin: new Vector3(12, 0.55, -5), direction: new Vector3(0, 0, 1), length: 20 },
 ];
 
-const FINISH_POSITION = new Vector3(11, 1.25, 0);
-const SNAKE_START_POSITION = new Vector3(-10, 3, 0);
+const FINISH_POSITION = new Vector3(13.5, 1.25, 0);
+const SNAKE_START_POSITION = new Vector3(-13, 3, 0);
 
 async function bootstrap(): Promise<void> {
   const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
