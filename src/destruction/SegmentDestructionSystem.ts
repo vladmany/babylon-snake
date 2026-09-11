@@ -4,7 +4,7 @@ import type { FragmentPool } from "./FragmentPool";
 
 const IMPACT_IMPULSE_THRESHOLD = 6;
 
-export type SegmentDestroyedHandler = (index: number, point: Vector3 | null) => void;
+export type SegmentDestroyedHandler = (index: number, position: Vector3) => void;
 
 /** Watches each snake segment's ground impacts and swaps hard-hit segments for pooled shards. */
 export class SegmentDestructionSystem {
@@ -57,6 +57,6 @@ export class SegmentDestructionSystem {
     segment.aggregate.body.setMotionType(PhysicsMotionType.STATIC);
 
     this.fragmentPool.activate(index, worldPosition, worldRotation);
-    this.onSegmentDestroyed?.(index, point);
+    this.onSegmentDestroyed?.(index, point ?? worldPosition);
   }
 }

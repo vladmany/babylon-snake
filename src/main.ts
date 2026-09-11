@@ -10,6 +10,9 @@ import { FragmentPool } from "./destruction/FragmentPool";
 import { SegmentDestructionSystem } from "./destruction/SegmentDestructionSystem";
 import { ObstacleCourse, type ObstacleBeamDefinition } from "./obstacles/ObstacleCourse";
 import { FinishZone } from "./obstacles/FinishZone";
+import { DustPool } from "./particles/DustPool";
+import { GroundContactDust } from "./particles/GroundContactDust";
+import dustTextureUrl from "./assets/textures/dust-particle.png";
 
 const OBSTACLE_BEAMS: readonly ObstacleBeamDefinition[] = [
   { origin: new Vector3(-4, 0.55, -15), direction: new Vector3(0, 0, 1), length: 18 },
@@ -31,9 +34,14 @@ async function bootstrap(): Promise<void> {
   const snake = new Snake(scene, 4, SNAKE_START_POSITION);
   new SnakeDragController(snake.segments);
 
+  const dustPool = new DustPool(scene, dustTextureUrl);
+  new GroundContactDust(snake, dustPool);
+
   const segmentIds = snake.segments.map((segment) => segment.id);
   const fragmentPool = new FragmentPool(scene, segmentIds, SEGMENT_COLORS);
-  const destructionSystem = new SegmentDestructionSystem(snake, fragmentPool);
+  const destructionSystem = new SegmentDestructionSystem(snake, fragmentPool, (_index, position) =>
+    dustPool.emitAt(position),
+  );
 
   new ObstacleCourse(scene, snake, destructionSystem, OBSTACLE_BEAMS);
   new FinishZone(scene, physicsPlugin, snake, FINISH_POSITION, () => {
