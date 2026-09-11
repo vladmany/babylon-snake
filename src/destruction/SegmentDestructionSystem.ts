@@ -39,6 +39,12 @@ export class SegmentDestructionSystem {
     return this.destroyed[index] ?? false;
   }
 
+  /** External trigger (e.g. an obstacle ray) for destroying a segment outright. */
+  public destroySegment(index: number): void {
+    if (this.destroyed[index]) return;
+    this.destroy(index, null);
+  }
+
   private destroy(index: number, point: Vector3 | null): void {
     this.destroyed[index] = true;
     const segment = this.snake.segments[index]!;
