@@ -1,10 +1,10 @@
-import { Control, Rectangle, StackPanel, TextBlock, type AdvancedDynamicTexture } from "@babylonjs/gui";
+import { Button, Control, Rectangle, StackPanel, TextBlock, type AdvancedDynamicTexture } from "@babylonjs/gui";
 
 /** Hidden congratulations overlay shown instead of a blocking alert on finish. */
 export class SuccessPanel {
   private readonly overlay: Rectangle;
 
-  constructor(adt: AdvancedDynamicTexture) {
+  constructor(adt: AdvancedDynamicTexture, onRestart: () => void) {
     const overlay = new Rectangle("success-overlay");
     overlay.width = 1;
     overlay.height = 1;
@@ -33,6 +33,15 @@ export class SuccessPanel {
     message.height = "28px";
     message.textWrapping = true;
     panel.addControl(message);
+
+    const restartButton = Button.CreateSimpleButton("restart-button", "Играть ещё раз");
+    restartButton.height = "44px";
+    restartButton.color = "white";
+    restartButton.background = "#2f8f3f";
+    restartButton.cornerRadius = 6;
+    restartButton.paddingTop = "8px";
+    restartButton.onPointerClickObservable.add(() => onRestart());
+    panel.addControl(restartButton);
 
     this.overlay = overlay;
   }

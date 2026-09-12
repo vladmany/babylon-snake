@@ -50,7 +50,7 @@ async function bootstrap(): Promise<void> {
 
   const gui = createFullscreenGui();
   new SegmentInspectorPanel(gui, scene, snake.segments);
-  const successPanel = new SuccessPanel(gui);
+  const successPanel = new SuccessPanel(gui, () => window.location.reload());
   new FinishZone(scene, physicsPlugin, snake, FINISH_POSITION, () => successPanel.show());
 
   engine.runRenderLoop(() => scene.render());
