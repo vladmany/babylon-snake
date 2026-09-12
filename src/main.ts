@@ -13,6 +13,9 @@ import { FinishZone } from "./obstacles/FinishZone";
 import { DustPool } from "./particles/DustPool";
 import { GroundContactDust } from "./particles/GroundContactDust";
 import dustTextureUrl from "./assets/textures/dust-particle.png";
+import { createFullscreenGui } from "./gui/createFullscreenGui";
+import { SegmentInspectorPanel } from "./gui/SegmentInspectorPanel";
+import { SuccessPanel } from "./gui/SuccessPanel";
 
 const OBSTACLE_BEAMS: readonly ObstacleBeamDefinition[] = [
   { origin: new Vector3(-6, 0.55, -15), direction: new Vector3(0, 0, 1), length: 20 },
@@ -44,9 +47,11 @@ async function bootstrap(): Promise<void> {
   );
 
   new ObstacleCourse(scene, snake, destructionSystem, OBSTACLE_BEAMS);
-  new FinishZone(scene, physicsPlugin, snake, FINISH_POSITION, () => {
-    alert("Поздравляем! Змейка добралась до финиша!");
-  });
+
+  const gui = createFullscreenGui();
+  new SegmentInspectorPanel(gui, scene, snake.segments);
+  const successPanel = new SuccessPanel(gui);
+  new FinishZone(scene, physicsPlugin, snake, FINISH_POSITION, () => successPanel.show());
 
   engine.runRenderLoop(() => scene.render());
   window.addEventListener("resize", () => engine.resize());
