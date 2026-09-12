@@ -11,16 +11,19 @@ export class SegmentDestructionSystem {
   private readonly snake: Snake;
   private readonly fragmentPool: FragmentPool;
   private readonly onSegmentDestroyed: SegmentDestroyedHandler | undefined;
+  private readonly onAllSegmentsDestroyed: (() => void) | undefined;
   private readonly destroyed: boolean[];
 
   constructor(
     snake: Snake,
     fragmentPool: FragmentPool,
     onSegmentDestroyed?: SegmentDestroyedHandler,
+    onAllSegmentsDestroyed?: () => void,
   ) {
     this.snake = snake;
     this.fragmentPool = fragmentPool;
     this.onSegmentDestroyed = onSegmentDestroyed;
+    this.onAllSegmentsDestroyed = onAllSegmentsDestroyed;
     this.destroyed = snake.segments.map(() => false);
 
     snake.segments.forEach((segment, index) => {
@@ -59,5 +62,9 @@ export class SegmentDestructionSystem {
 
     this.fragmentPool.activate(index, worldPosition, worldRotation);
     this.onSegmentDestroyed?.(index, point ?? worldPosition);
+
+    if (this.destroyed.every(Boolean)) {
+      this.onAllSegmentsDestroyed?.();
+    }
   }
 }

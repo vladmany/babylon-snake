@@ -15,7 +15,7 @@ import { GroundContactDust } from "./particles/GroundContactDust";
 import dustTextureUrl from "./assets/textures/dust-particle.png";
 import { createFullscreenGui } from "./gui/createFullscreenGui";
 import { SegmentInspectorPanel } from "./gui/SegmentInspectorPanel";
-import { SuccessPanel } from "./gui/SuccessPanel";
+import { EndGameOverlay } from "./gui/EndGameOverlay";
 
 const OBSTACLE_BEAMS: readonly ObstacleBeamDefinition[] = [
   { origin: new Vector3(-6, 0.55, -15), direction: new Vector3(0, 0, 1), length: 20 },
@@ -26,6 +26,12 @@ const OBSTACLE_BEAMS: readonly ObstacleBeamDefinition[] = [
 
 const FINISH_POSITION = new Vector3(13.5, 1.25, 0);
 const SNAKE_START_POSITION = new Vector3(-13, 3, 0);
+
+const VICTORY_TEXT = { title: "Поздравляем!", message: "Змейка добралась до финиша." };
+const DEFEAT_TEXT = {
+  title: "Змейка уничтожена",
+  message: "Все сегменты разбиты вдребезги. Попробуйте снова!",
+};
 
 async function bootstrap(): Promise<void> {
   const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -40,18 +46,21 @@ async function bootstrap(): Promise<void> {
   const dustPool = new DustPool(scene, dustTextureUrl);
   new GroundContactDust(snake, dustPool);
 
+  const gui = createFullscreenGui();
+  new SegmentInspectorPanel(gui, scene, snake.segments);
+  const endGameOverlay = new EndGameOverlay(gui, "end-game", () => window.location.reload());
+
   const segmentIds = snake.segments.map((segment) => segment.id);
   const fragmentPool = new FragmentPool(scene, segmentIds, SEGMENT_COLORS);
-  const destructionSystem = new SegmentDestructionSystem(snake, fragmentPool, (_index, position) =>
-    dustPool.emitAt(position),
+  const destructionSystem = new SegmentDestructionSystem(
+    snake,
+    fragmentPool,
+    (_index, position) => dustPool.emitAt(position),
+    () => endGameOverlay.show(DEFEAT_TEXT),
   );
 
   new ObstacleCourse(scene, snake, destructionSystem, OBSTACLE_BEAMS);
-
-  const gui = createFullscreenGui();
-  new SegmentInspectorPanel(gui, scene, snake.segments);
-  const successPanel = new SuccessPanel(gui, () => window.location.reload());
-  new FinishZone(scene, physicsPlugin, snake, FINISH_POSITION, () => successPanel.show());
+  new FinishZone(scene, physicsPlugin, snake, FINISH_POSITION, () => endGameOverlay.show(VICTORY_TEXT));
 
   engine.runRenderLoop(() => scene.render());
   window.addEventListener("resize", () => engine.resize());
