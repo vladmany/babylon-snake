@@ -4,17 +4,18 @@ import {
   MeshBuilder,
   PhysicsAggregate,
   PhysicsShapeType,
-  StandardMaterial,
+  ShaderMaterial,
   type Scene,
 } from "@babylonjs/core";
 import { CollisionGroup, type SegmentMetadata } from "./types";
+import { createSegmentShaderMaterial } from "./createSegmentShaderMaterial";
 
 export const SEGMENT_SIZE = { width: 1.4, height: 0.8, depth: 0.8 } as const;
 
 export class SnakeSegment {
   public readonly mesh: Mesh;
   public readonly aggregate: PhysicsAggregate;
-  public readonly material: StandardMaterial;
+  public readonly material: ShaderMaterial;
 
   constructor(
     scene: Scene,
@@ -30,8 +31,7 @@ export class SnakeSegment {
     this.mesh.position.set(position.x, position.y, position.z);
     this.mesh.metadata = { id } satisfies SegmentMetadata;
 
-    this.material = new StandardMaterial(`segment-${id}-material`, scene);
-    this.material.diffuseColor = color;
+    this.material = createSegmentShaderMaterial(scene, `segment-${id}-material`, color);
     this.mesh.material = this.material;
 
     this.aggregate = new PhysicsAggregate(

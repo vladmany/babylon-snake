@@ -72,6 +72,6 @@ export class SegmentInspectorPanel {
     if (this.selectedId === null) return;
     const segment = this.segmentsById.get(this.selectedId);
     if (segment === undefined) return;
-    segment.material.diffuseColor = color;
+    segment.material.setColor3("baseColor", color);
   }
 }
